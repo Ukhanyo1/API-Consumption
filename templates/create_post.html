@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create a New Post</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        // Hide the message section initially
+        window.onload = function() {
+            var messages = document.getElementById("message-section");
+            if (messages) {
+                messages.style.display = "none";
+            }
+        };
+
+        // Function to show message after form submission
+        function showMessage() {
+            var messages = document.getElementById("message-section");
+            if (messages) {
+                messages.style.display = "block";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Create a New Post</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div id="message-section">
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('create_post') }}" onsubmit="showMessage()">
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="title" placeholder="Enter post title" required><br><br>
+
+        <label for="body">Body:</label><br>
+        <textarea id="body" name="body" placeholder="Enter post content" rows="5" required></textarea><br><br>
+
+        <button type="submit">Create Post</button>
+    </form>
+
+    <a href="{{ url_for('home') }}">Back to Posts</a>
+</body>
+</html>

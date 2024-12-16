@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Posts</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <h1>Post Titles</h1>
+        <a href="{{ url_for('create_post') }}" class="btn create-post-btn">Create a New Post</a>
+    </header>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="container">
+        <!-- Left Column: List of Posts -->
+        <div class="left-column">
+            <ul>
+                {% for post in posts %}
+                    <li>
+                        <a href="#" class="post-title" data-post-id="{{ post['id'] }}">{{ post['title'] }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Right Column: Post Details -->
+        <div class="right-column">
+            {% if selected_post %}
+                <h2>{{ selected_post['title'] }}</h2>
+                <p>{{ selected_post['body'] }}</p>
+
+                <h3>Comments</h3>
+                <ul>
+                    {% for comment in comments %}
+                        <li>
+                            <strong>{{ comment['name'] }}</strong> - {{ comment['email'] }}
+                            <p>{{ comment['body'] }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Select a post to view its details.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2024 My Blog. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // JavaScript to dynamically update the post details on the same page
+        document.querySelectorAll('.post-title').forEach(function (element) {
+            element.addEventListener('click', function (e) {
+                e.preventDefault();
+                const postId = element.getAttribute('data-post-id');
+                fetch(`/post_details/${postId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.querySelector('.right-column').innerHTML = `
+                            <h2>${data.title}</h2>
+                            <p>${data.body}</p>
+                            <h3>Comments</h3>
+                            <ul>
+                                ${data.comments.map(comment => `
+                                    <li>
+                                        <strong>${comment.name}</strong> - ${comment.email}
+                                        <p>${comment.body}</p>
+                                    </li>`).join('')}
+                            </ul>
+                        `;
+                    })
+                    .catch(error => console.error('Error fetching post details:', error));
+            });
+        });
+    </script>
+
+</body>
+</html>
